@@ -1,9 +1,65 @@
 import pandas as pd
 import numpy as np
 import sys
-from typing import Iterator, Tuple, List, TextIO
+from enum import Enum
+from typing import Iterator, Tuple, List, TextIO, Dict, Optional
 
 Sample = Tuple[np.ndarray, int]
+
+
+class SampleType(Enum):
+    """Enumeration for the type of sample being processed in online mode."""
+
+    TRAINING = 1
+    TEST = 2
+    CORRECTION = 3
+
+
+def load_online_stream(
+    stream: TextIO, class_map: Dict[str, int]
+) -> Iterator[Tuple[SampleType, np.ndarray, int, Optional[int]]]:
+    """
+    A generator that reads from a stream (stdin) line by line,
+    parses the online protocol with tokens like <Training>, <Test>,
+    and yields samples with their type.
+
+    Yields:
+        A tuple of (SampleType, features, true_label, optional_correction_label).
+    """
+    for line in stream:
+        token = line.strip()
+
+        try:
+            if token == "<Training>":
+                data_line = next(stream).strip()
+                parts = data_line.split(",")
+                features = np.array([float(p) for p in parts[:-1]], dtype=float)
+                label_name = parts[-1]
+                yield SampleType.TRAINING, features, class_map[label_name], None
+
+            elif token == "<Test>":
+                data_line = next(stream).strip()
+                parts = data_line.split(",")
+                features = np.array([float(p) for p in parts[:-1]], dtype=float)
+                label_name = parts[-1]
+                yield SampleType.TEST, features, class_map[label_name], None
+
+            elif token == "<Correction>":
+                data_line = next(stream).strip()
+                parts = data_line.split(",")
+                features = np.array([float(p) for p in parts[:-2]], dtype=float)
+                true_label_name = parts[-2]
+                predicted_label_id = int(parts[-1])
+                yield SampleType.CORRECTION, features, class_map[
+                    true_label_name
+                ], predicted_label_id
+
+        except (StopIteration, ValueError, KeyError, IndexError) as e:
+            print(
+                f"Warning: Skipping malformed data stream entry near token '{token}'. Error: {e}",
+                file=sys.stderr,
+            )
+            continue
 
 
 def _process_dataframe(df: pd.DataFrame, label_col: str) -> Iterator[Sample]:
