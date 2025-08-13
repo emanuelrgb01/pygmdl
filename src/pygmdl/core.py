@@ -329,3 +329,28 @@ class GMDL:
                 s[c] = cost**self.tau
 
         return s
+
+    def diagnose(self, features: np.ndarray) -> Dict[str, Any]:
+        """
+        Provides a dictionary with internal state information for a given sample,
+        useful for debugging.
+
+        Args:
+            features: The feature vector to diagnose.
+
+        Returns:
+            A dictionary containing description lengths, theta weights, and distances.
+        """
+        distances = self._get_distances(features)
+        description_lengths = np.array(
+            [self._L_hat(features, c, distances) for c in range(self.n_classes)]
+        )
+
+        total_dl = self._L_total(features, distances)
+        final_lengths = description_lengths / total_dl
+
+        return {
+            "description_lengths": final_lengths,
+            "theta": self.theta,
+            "distances_S": distances,
+        }
