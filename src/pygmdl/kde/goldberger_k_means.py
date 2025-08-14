@@ -1,8 +1,8 @@
 import numpy as np
 from typing import List, Tuple, TypeVar
 
-from mixture import Mixture
-from kde_utils import MatrixType
+from .mixture import Mixture
+from .kde_utils import MatrixType
 
 PDF_T = TypeVar("PDF_T")
 

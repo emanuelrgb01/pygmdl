@@ -1,10 +1,10 @@
 import numpy as np
 from typing import List, TypeVar
 
-from mixture import Mixture
-from hellinger_distance import hellinger_distance
-from goldberger_k_means import goldberger_k_means
-from kde_utils import vector_max_val_and_idx, MatrixType
+from .mixture import Mixture
+from .hellinger_distance import hellinger_distance
+from .goldberger_k_means import goldberger_k_means
+from .kde_utils import vector_max_val_and_idx, MatrixType
 
 PDF_T = TypeVar("PDF_T")
 

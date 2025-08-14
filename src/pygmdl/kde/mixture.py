@@ -2,7 +2,7 @@ import numpy as np
 from typing import List, Generic, TypeVar
 import copy
 
-from kde_utils import VectorType, MatrixType, DataType
+from .kde_utils import VectorType, MatrixType, DataType
 
 PDF_T = TypeVar("PDF_T")
 

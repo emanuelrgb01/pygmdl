@@ -2,7 +2,7 @@ import numpy as np
 from typing import TypeVar
 import copy
 
-from mixture import Mixture
+from .mixture import Mixture
 
 PDF_T = TypeVar("PDF_T")
 

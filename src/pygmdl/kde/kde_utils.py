@@ -1,6 +1,7 @@
 import numpy as np
 from typing import List
-import constants as constants
+
+import .constants as constants
 
 VectorType = np.ndarray
 MatrixType = np.ndarray
