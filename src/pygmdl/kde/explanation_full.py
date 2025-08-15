@@ -1,5 +1,6 @@
 import numpy as np
 from typing import Generic, TypeVar, List
+import copy
 
 from .gaussian_full import GaussianFull
 from .mixture import Mixture
@@ -77,6 +78,13 @@ class ExplanationFull(GaussianFull, Generic[SamplePDF_T]):
         return instance
 
     @classmethod
+    def from_mixture(
+        cls, mix: Mixture, is_flat: bool = False
+    ) -> "ExplanationFull[SamplePDF_T]":
+        """Wrapper to appropriate moment-matching constructor for Explanations."""
+        return cls.from_moment_match(mix, use_base_covariance=is_flat)
+
+    @classmethod
     def from_merge(
         cls, mix: Mixture["ExplanationFull[SamplePDF_T]"], bandwidth: MatrixType
     ) -> "ExplanationFull[SamplePDF_T]":
@@ -92,7 +100,9 @@ class ExplanationFull(GaussianFull, Generic[SamplePDF_T]):
                 expl_comp.underlying_model.components,
                 expl_comp.underlying_model.weights,
             ):
-                all_details.add(detailed_comp, detailed_weight * expl_weight)
+                all_details.add(
+                    copy.deepcopy(detailed_comp), detailed_weight * expl_weight
+                )
 
         all_details.normalize_weights_preserve_relative_importance()
 

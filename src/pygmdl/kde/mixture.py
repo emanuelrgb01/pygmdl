@@ -167,6 +167,14 @@ class Mixture(Generic[PDF_T]):
         """Multiplies all weights by a given factor."""
         self._weights = [w * factor for w in self._weights]
 
+    def mean(self, index: int) -> VectorType:
+        """Returns the mean of the component at a specific index."""
+        return self._components[index].mean
+
+    def covariance(self, index: int) -> MatrixType:
+        """Returns the covariance of the component at a specific index."""
+        return self._components[index].covariance
+
     def likelihood(self, sample: VectorType) -> DataType:
         """Calculates the likelihood of a given sample."""
         return np.sum(

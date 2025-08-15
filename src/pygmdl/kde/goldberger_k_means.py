@@ -110,7 +110,7 @@ def refit(
             for j in assigned_indices:
                 close_mix.add(mix.component(j), mix.weight(j) / comp_weight)
 
-            new_component = ComponentType(close_mix, optimal_bandwidth)
+            new_component = ComponentType.from_merge(close_mix, optimal_bandwidth)
 
             compressed_mix.replace(i, new_component, comp_weight)
 

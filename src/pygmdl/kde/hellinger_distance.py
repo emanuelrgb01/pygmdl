@@ -53,9 +53,9 @@ def hellinger_distance(one: Mixture[PDF_T], other: Mixture[PDF_T]) -> float:
 
     for i in range(len(importance_mix)):
         component = importance_mix.component(i)
-        mean = component.mean()
+        mean = component.mean
+        cov = component.covariance
 
-        cov = component.covariance()
         if cov.ndim == 1:
             cov = np.diag(cov)
 

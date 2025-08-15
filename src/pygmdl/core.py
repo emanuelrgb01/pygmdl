@@ -3,7 +3,7 @@ from typing import List, Dict, Any, Optional
 
 from . import kde
 
-type KDE_Class = kde.OKDEDiagonal[kde.GaussianDiagonal]
+# type KDE_Class = kde.OKDEDiagonal[kde.GaussianDiagonal]
 
 Sample = Dict[str, Any]
 Prediction = Dict[str, Any]
@@ -42,7 +42,7 @@ class GMDL:
         self.theta = np.full(n_dims, self.max_theta, dtype=float)
         self.gradients = np.zeros(n_dims, dtype=float)
 
-        # KDE_Class = kde.OKDEDiagonal[kde.GaussianDiagonal]
+        KDE_Class = kde.OKDEDiagonal[kde.GaussianDiagonal]
 
         self.distributions: Dict[int, List[KDE_Class]] = {
             c: [KDE_Class(dims=1) for _ in range(n_dims)] for c in range(n_classes)

@@ -18,7 +18,7 @@ from .similarity_groups import generate_similarity_groups_indexes
 SamplePDF_T = TypeVar("SamplePDF_T")
 
 
-class OKDEFull(OKDEBase[SamplePDF_T, MatrixType]):
+class OKDEFull(OKDEBase[SamplePDF_T, MatrixType, ExplanationFull[SamplePDF_T]]):
     """Online Kernel Density Estimator with Full Covariance matrices."""
 
     def __init__(self, dims: int, d_th: float = 0.1, forgetting_factor: float = 1.0):
@@ -161,9 +161,32 @@ class OKDEFull(OKDEBase[SamplePDF_T, MatrixType]):
 
         whitened_kde = OKDEFull.from_whitening(self, smp.mean, F_trns, eig_ok)
 
-        revitalization_list_indices = whitened_kde.revitalize()
-        if revitalization_list_indices:
-            whitened_kde.convolve(whitened_kde.optimal_bandwidth)
+        revitalized_indices_in_whitened_kde = whitened_kde.revitalize()
+
+        # If any components were revitalized in the whitened space, we must
+        # apply the same revitalization to the original KDE to keep them in sync.
+        if revitalized_indices_in_whitened_kde:
+            new_components = []
+            new_weights = []
+            revitalized_set = set(revitalized_indices_in_whitened_kde)
+
+            for i in range(len(self)):
+                component = self.component(i)
+                weight = self.weight(i)
+
+                if i in revitalized_set:
+                    splitted_mixture = component.revitalize()
+                    splitted_mixture.convolve(self.optimal_bandwidth)
+
+                    for j in range(len(splitted_mixture)):
+                        new_components.append(splitted_mixture.component(j))
+                        new_weights.append(weight * splitted_mixture.weight(j))
+                else:
+                    new_components.append(component)
+                    new_weights.append(weight)
+
+            self._components = new_components
+            self._weights = new_weights
 
         group_indexes = generate_similarity_groups_indexes(
             whitened_kde, whitened_kde.optimal_bandwidth, self.d_th

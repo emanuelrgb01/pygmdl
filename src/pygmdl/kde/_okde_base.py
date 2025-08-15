@@ -13,7 +13,9 @@ CovarianceType = TypeVar("CovarianceType", VectorType, MatrixType)
 ExplanationType = TypeVar("ExplanationType", ExplanationFull, ExplanationDiagonal)
 
 
-class OKDEBase(Mixture[ExplanationType], ABC, Generic[SamplePDF_T, CovarianceType]):
+class OKDEBase(
+    Mixture[ExplanationType], ABC, Generic[SamplePDF_T, CovarianceType, ExplanationType]
+):
     """
     Abstract Base Class for an Online Kernel Density Estimator (oKDE).
 

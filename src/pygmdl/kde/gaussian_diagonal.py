@@ -1,5 +1,5 @@
 import numpy as np
-from typing import Tuple, List
+from typing import Tuple, List, Union
 
 from ._gaussian_base import GaussianBase
 from .mixture import Mixture
@@ -67,6 +67,14 @@ class GaussianDiagonal(GaussianBase[VectorType]):
 
         return cls(dims, new_mean, new_cov_diag)
 
+    @classmethod
+    def from_merge(cls, mix: Mixture, bandwidth: MatrixType) -> "GaussianDiagonal":
+        """
+        Creates a Gaussian by merging a mixture of other Gaussians.
+        The bandwidth parameter is ignored, mirroring the C++ implementation.
+        """
+        return cls.from_mixture(mix, is_flat=False)
+
     def KL_divergence(self, other: GaussianBase) -> float:
         if not isinstance(other, GaussianDiagonal):
             raise TypeError("KL Divergence requires another GaussianDiagonal instance.")
@@ -105,3 +113,33 @@ class GaussianDiagonal(GaussianBase[VectorType]):
         """
         temp_full_gauss = GaussianFull(self.dims, self.mean, np.diag(self.covariance))
         return temp_full_gauss.get_whitening_parameters_svd()
+
+    def convolve(self, bandwidth: Union[VectorType, MatrixType]) -> None:
+        """
+        Adds a bandwidth to the covariance.
+        If the bandwidth is a full matrix, its diagonal is extracted.
+        """
+        bw_to_add = np.diag(bandwidth) if bandwidth.ndim == 2 else bandwidth
+
+        if self._covariance.shape != bw_to_add.shape:
+            raise ValueError(
+                f"Shape mismatch in convolve: self._covariance has shape {self._covariance.shape}, but bandwidth to add has shape {bw_to_add.shape}"
+            )
+
+        self._covariance += bw_to_add
+        self._inverse_is_dirty = True
+
+    def deconvolve(self, bandwidth: Union[VectorType, MatrixType]) -> None:
+        """
+        Subtracts a bandwidth from the covariance.
+        If the bandwidth is a full matrix, its diagonal is extracted.
+        """
+        bw_to_subtract = np.diag(bandwidth) if bandwidth.ndim == 2 else bandwidth
+
+        if self._covariance.shape != bw_to_subtract.shape:
+            raise ValueError(
+                f"Shape mismatch in deconvolve: self._covariance has shape {self._covariance.shape}, but bandwidth to subtract has shape {bw_to_subtract.shape}"
+            )
+
+        self._covariance -= bw_to_subtract
+        self._inverse_is_dirty = True

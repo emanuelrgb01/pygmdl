@@ -82,6 +82,14 @@ class GaussianFull(GaussianBase[MatrixType]):
 
         return cls(dims, new_mean, new_cov)
 
+    @classmethod
+    def from_merge(cls, mix: Mixture, bandwidth: MatrixType) -> "GaussianFull":
+        """
+        Creates a Gaussian by merging a mixture of other Gaussians.
+        The bandwidth parameter is ignored, mirroring the C++ implementation.
+        """
+        return cls.from_mixture(mix, is_flat=False)
+
     def KL_divergence(self, other: GaussianBase) -> float:
         if not isinstance(other, GaussianFull):
             raise TypeError("KL Divergence requires another GaussianFull instance.")
