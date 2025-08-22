@@ -10,7 +10,7 @@ source $VENV_DIR/bin/activate
 
 pip install uv pip-tools
 
-pip-compile requirements.in --output-file requirements.txt --upgrade
+# pip-compile requirements.in --output-file requirements.txt --upgrade
 
 uv pip install -r requirements.txt
 
